@@ -41,9 +41,29 @@ public:
             }
     }
     
+    // Sort the array and group the array by its sign
+    void signGroup(iord* output_a, int size){
+        Sort(output_a,size);
+        int pos_num=0,neg_num=0;
+        for(int i=0;i<size;i++){
+            if(output_a[i]>=0)
+                ++pos_num;
+            else
+                ++neg_num;
+        }
+        for(int i=0;i<size;i++){
+            if(output_a[i]>=0)
+                pos_array.push_back(output_a[i]);
+            else
+                neg_array.push_back(output_a[i]);
+        }
+    }
+    
     // The output vector
     std::vector<iord> output;
     iord* output_array;
+    std::vector<iord> pos_array;
+    std::vector<iord> neg_array;
     
     // Use this to analysis input string
     void analysis(std::string input){
@@ -138,6 +158,17 @@ void output_result(std::deque<vector <iord> > & result,std::chrono::steady_clock
     cout<<"Cost "<<time_span.count()<<" seconds."<<endl;
 }
 
+template<typename iord>
+void pack_result(std::deque<vector <iord> > & result, iord a1, iord a2, iord a3){
+    std::vector<iord> vec_temp;
+    vec_temp.clear();
+    vec_temp.push_back(a1);
+    vec_temp.push_back(a2);
+    vec_temp.push_back(a3);
+    result.push_back(vec_temp);
+    return;
+}
+
 /*
  * 
  */
@@ -161,6 +192,8 @@ int main(int argc, char** argv) {
     std::chrono::steady_clock::time_point time_p2;
 
 /*******************************************************************************************/
+    cout<<"**************************"<<endl;
+    cout<<"Algorithm 1: n3 Brutal solution"<<endl;
     //Start time counting
     time_p1=std::chrono::steady_clock::now();
     // Algorithm 1: n3 brutal 
@@ -168,21 +201,18 @@ int main(int argc, char** argv) {
         for(int j=i+1;j<body.output.size();j++)
             for(int k=j+1;k<body.output.size();k++){
                 if((body.output[i]+body.output[j]+body.output[k]) == 0){
-                    vec_temp.clear();
-                    vec_temp.push_back(body.output[i]);
-                    vec_temp.push_back(body.output[j]);
-                    vec_temp.push_back(body.output[k]);
-                    result.push_back(vec_temp);
+                    ::pack_result(result,body.output[i],body.output[j],body.output[k]);
                 }
             }
     // Stop time counting
     time_p2=std::chrono::steady_clock::now();
     //Output the result and duration time this algorithm took
-    cout<<"**************************"<<endl;
-    cout<<"Algorithm 1: n3 Brutal solution"<<endl;
     ::output_result(result,time_p1,time_p2);
     
+    
 /*******************************************************************************************/
+    cout<<"**************************"<<endl;
+    cout<<"Algorithm 2: n2log(n) A little faster solution"<<endl;
     result.clear();
     vec_temp.clear();
     //Sort the array at first
@@ -196,14 +226,13 @@ int main(int argc, char** argv) {
             int cal_temp=0;
             array_it = (int)((j+body.output.size())/2);
             while(true){
-                cal_temp=body.output_array[array_it]+body.output_array[i]+body.output_array[j];
+                if(array_it<=j)
+                    break;
+                cal_temp=body.output_array[i]+body.output_array[array_it]+body.output_array[j];
+                //cout<<body.output_array[i]<<"  "<<body.output_array[array_it]<<"  "<<body.output_array[j]<<endl;
                 if(cal_temp==0){
                     //Find an available one, push to vector
-                    vec_temp.clear();
-                    vec_temp.push_back(body.output_array[i]);
-                    vec_temp.push_back(body.output_array[j]);
-                    vec_temp.push_back(body.output_array[array_it]);
-                    result.push_back(vec_temp);
+                    ::pack_result(result,body.output_array[i],body.output_array[j],body.output_array[array_it]);
                     break;
                 }
                 else if(cal_temp>0){
@@ -229,12 +258,11 @@ int main(int argc, char** argv) {
         }
     // Stop time counting
     time_p2=std::chrono::steady_clock::now();
-    //Output the result and duration time this algorithm took
-    cout<<"**************************"<<endl;
-    cout<<"Algorithm 2: n2log(n) A little faster solution"<<endl;
+    //Output the result and duration time this algorithm took1 
     ::output_result(result,time_p1,time_p2);
     
 /*******************************************************************************************/    
+    
     
 //    for(int i=0;i<body.output.size()-1;i++){
 //        cout<<body.output_array[i]<<",";
